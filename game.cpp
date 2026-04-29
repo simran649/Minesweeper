@@ -3,6 +3,8 @@
 #include <ctime>
 using namespace std;
 
+//creating a class called minesweeper
+
 class Minesweeper{
 
     private:
