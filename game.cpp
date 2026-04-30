@@ -1,28 +1,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include "game.h"
 #include <SFML/Graphics.hpp>
 using namespace std;
-
-//creating a class called minesweeper
-
-class Minesweeper{
-
-    private:
-    static const int size=10;
-    int board[size][size];
-    bool reveal[size][size];
-    bool flag[size][size];
-
-    public:
-    void initialization();
-    void placingmines();
-    void calculateno();
-    void play();
-    void printboard();
-    void floodfill(int i, int j);
-    bool checkwin();
-};
 
 void Minesweeper::initialization(){
 
@@ -275,19 +256,35 @@ void Minesweeper::play(){
 
 }
 
+bool Minesweeper::isRevealed(int i, int j){
+    return reveal[i][j];
+    }
+    
+int Minesweeper::getValue(int i, int j){ 
+    return board[i][j];
+    }
+
 const int TILE_SIZE = 40;
 
-void drawGrid(sf::RenderWindow& window) {
+void drawGrid(sf::RenderWindow& window, Minesweeper& game){
     sf::RectangleShape cell(sf::Vector2f(TILE_SIZE - 2, TILE_SIZE - 2));
 
-    cell.setFillColor(sf::Color::White);
     cell.setOutlineThickness(1);
     cell.setOutlineColor(sf::Color::Black);
 
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++){
+        for (int j = 0; j < 10; j++){
+            
             cell.setPosition(sf::Vector2f(j * TILE_SIZE, i * TILE_SIZE));
+
+            if (!game.isRevealed(i, j)) {
+                cell.setFillColor(sf::Color(150, 150, 150));
+            } 
+            else {
+                cell.setFillColor(sf::Color::White);
+            }
             window.draw(cell);
+            
         }
     }
 }
