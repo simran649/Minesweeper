@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <SFML/Graphics.hpp>
 using namespace std;
 
 //creating a class called minesweeper
@@ -274,3 +275,19 @@ void Minesweeper::play(){
 
 }
 
+const int TILE_SIZE = 40;
+
+void drawGrid(sf::RenderWindow& window) {
+    sf::RectangleShape cell(sf::Vector2f(TILE_SIZE - 2, TILE_SIZE - 2));
+
+    cell.setFillColor(sf::Color::White);
+    cell.setOutlineThickness(1);
+    cell.setOutlineColor(sf::Color::Black);
+
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            cell.setPosition(sf::Vector2f(j * TILE_SIZE, i * TILE_SIZE));
+            window.draw(cell);
+        }
+    }
+}
