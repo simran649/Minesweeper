@@ -274,15 +274,3 @@ void Minesweeper::play(){
 
 }
 
-int main(){
-
-    srand(time(0));
-
-    Minesweeper game;
-    game.initialization();
-    game.placingmines();
-    game.calculateno();
-    game.play();
-
-    return 0;
-}
