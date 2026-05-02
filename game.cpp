@@ -267,24 +267,41 @@ int Minesweeper::getValue(int i, int j){
 const int TILE_SIZE = 40;
 
 void drawGrid(sf::RenderWindow& window, Minesweeper& game){
-    sf::RectangleShape cell(sf::Vector2f(TILE_SIZE - 2, TILE_SIZE - 2));
 
+    sf::Font font;
+    if(!font.openFromFile("Roboto-Regular.ttf")){
+        std::cout<<"Font not loaded\n";
+    }
+    sf::RectangleShape cell(sf::Vector2f(TILE_SIZE - 2, TILE_SIZE - 2));
     cell.setOutlineThickness(1);
     cell.setOutlineColor(sf::Color::Black);
 
-    for (int i = 0; i < 10; i++){
-        for (int j = 0; j < 10; j++){
-            
+    for(int i = 0; i < 10; i++){
+        for(int j = 0; j < 10; j++){
             cell.setPosition(sf::Vector2f(j * TILE_SIZE, i * TILE_SIZE));
-
-            if (!game.isRevealed(i, j)) {
-                cell.setFillColor(sf::Color(150, 150, 150));
-            } 
-            else {
+            if(!game.isRevealed(i, j)){
+                cell.setFillColor(sf::Color(150,150,150));
+            }
+            else{
                 cell.setFillColor(sf::Color::White);
             }
             window.draw(cell);
-            
+
+            if(game.isRevealed(i, j)){
+                int value= game.getValue(i, j);
+
+                if(value > 0){
+                    sf::Text text(font, "", 20);
+                    text.setFont(font);
+                    text.setString(std::to_string(value));
+                    text.setCharacterSize(20);
+                    text.setFillColor(sf::Color::Blue);
+
+                    text.setPosition(sf::Vector2f(j * TILE_SIZE + 10, i * TILE_SIZE + 5));
+                    window.draw(text);
+                }
+            }
+
         }
     }
 }
