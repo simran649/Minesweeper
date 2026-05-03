@@ -278,7 +278,9 @@ bool Minesweeper::isFlagged(int i, int j){
 
 void Minesweeper::handleClick(int row, int col, bool& firstMove, bool& gameOver){
 
-    if(flag[row][col]) return;
+    if(flag[row][col]){
+        return;
+    }
 
     if(firstMove && board[row][col] == -1){
 
@@ -314,7 +316,7 @@ void Minesweeper::handleClick(int row, int col, bool& firstMove, bool& gameOver)
 
 const int TILE_SIZE = 40;
 
-void drawGrid(sf::RenderWindow& window, Minesweeper& game, bool gameOver){
+void drawGrid(sf::RenderWindow& window, Minesweeper& game, bool gameOver, bool gameWon){
 
     sf::Font font;
     if(!font.openFromFile("Roboto-Regular.ttf")){
@@ -374,6 +376,20 @@ void drawGrid(sf::RenderWindow& window, Minesweeper& game, bool gameOver){
                 }
             }
 
+        }
+
+        if(gameOver){
+            sf::Text gameOverText(font, "GAME OVER", 40);
+            gameOverText.setFillColor(sf::Color::Red);
+            gameOverText.setPosition(sf::Vector2f(80, 180));
+            window.draw(gameOverText);
+        }
+
+        if(gameWon){
+            sf::Text winText(font, "YOU WIN!", 40);
+            winText.setFillColor(sf::Color::Green);
+            winText.setPosition(sf::Vector2f(100, 100));
+            window.draw(winText);
         }
     }
 }

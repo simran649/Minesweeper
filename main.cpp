@@ -5,7 +5,8 @@
 
 bool firstMove = true;
 bool gameOver = false;
-void drawGrid(sf::RenderWindow& window, Minesweeper& game, bool gameOver);
+bool gameWon = false;
+void drawGrid(sf::RenderWindow& window, Minesweeper& game, bool gameOver, bool gameWon);
 
 int main() {
     srand(time(0));
@@ -22,7 +23,7 @@ int main() {
             if (event->is<sf::Event::Closed>()){
                 window.close();
             }
-                if (event->is<sf::Event::MouseButtonPressed>() && !gameOver) {
+                if (event->is<sf::Event::MouseButtonPressed>() && !gameOver && !gameWon){
                     if(auto mouse = event->getIf<sf::Event::MouseButtonPressed>()){
                         
                         int x = mouse->position.x;        
@@ -32,18 +33,10 @@ int main() {
                         int col = x / 40;
 
                         if(mouse->button == sf::Mouse::Button::Left){
-                            if(game.isFlagged(row, col)){
-                                continue;
+                            game.handleClick(row, col, firstMove, gameOver);
+                            if(!gameOver && game.checkwin()){
+                                gameWon = true;
                             }
-
-                            if(game.getValue(row, col) == -1){
-                                gameOver = true;
-                                continue;
-                            }
-                            else{
-                                game.floodfill(row, col);
-                            }
-                            
                         }
                         else if(mouse->button == sf::Mouse::Button::Right){
                             game.toggleFlag(row, col);
@@ -54,7 +47,7 @@ int main() {
 
         window.clear(sf::Color::Blue);
 
-        drawGrid(window, game, gameOver);
+        drawGrid(window, game, gameOver, gameWon);
 
         window.display();
     }
