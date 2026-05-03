@@ -15,7 +15,8 @@ public:
     void printboard();
     void floodfill(int i, int j);
     bool checkwin();
-
     bool isRevealed(int i, int j);
     int getValue(int i, int j);
+    void toggleFlag(int i, int j);
+    bool isFlagged(int i, int j);
 };
