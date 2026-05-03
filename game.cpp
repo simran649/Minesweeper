@@ -76,11 +76,13 @@ void Minesweeper::floodfill(int i, int j){
         return;
     }
 
+    //if there is a no. here we will move out of this function
     reveal[i][j] = true;
     if(board[i][j]!=0){
         return;
     }
 
+    //if we reached this part it means that the cell we clicked is empty contains 0
     for(int x=-1; x<=1; x++){
         for(int y=-1; y<=1; y++){
             floodfill(i + x, j + y);
@@ -163,7 +165,7 @@ void Minesweeper::play(){
             continue;
         }
 
-         //if the user wants to place a flag this will place the flag at the desired position and if the flag already exists it will remove it
+        //if the user wants to place a flag this will place the flag at the desired position and if the flag already exists it will remove it
         if(ch == "f" || ch == "F"){
             if(reveal[m][n] == true){
                 cout<<"Cannot flag a revealed cell\n";
@@ -258,11 +260,21 @@ void Minesweeper::play(){
 
 bool Minesweeper::isRevealed(int i, int j){
     return reveal[i][j];
-    }
+}
     
 int Minesweeper::getValue(int i, int j){ 
     return board[i][j];
+}
+
+void Minesweeper::toggleFlag(int i, int j){
+    if(!reveal[i][j]){
+        flag[i][j] =!flag[i][j];
     }
+}
+
+bool Minesweeper::isFlagged(int i, int j){
+    return flag[i][j];
+}
 
 const int TILE_SIZE = 40;
 
@@ -286,6 +298,18 @@ void drawGrid(sf::RenderWindow& window, Minesweeper& game){
                 cell.setFillColor(sf::Color::White);
             }
             window.draw(cell);
+
+            if(!game.isRevealed(i, j) && game.isFlagged(i, j)){
+                sf::Text flagText(font, "F", 20);
+                flagText.setFillColor(sf::Color::Red);
+
+                flagText.setPosition(sf::Vector2f(
+                    j * TILE_SIZE + 10,
+                    i * TILE_SIZE + 5
+                ));
+
+                window.draw(flagText);
+            }
 
             if(game.isRevealed(i, j)){
                 int value= game.getValue(i, j);

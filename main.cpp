@@ -3,6 +3,7 @@
 #include <ctime>
 #include "game.h"
 
+bool gameOver = false;
 void drawGrid(sf::RenderWindow& window, Minesweeper& game);
 
 int main() {
@@ -28,10 +29,23 @@ int main() {
                         
                         int row = y / 40;
                         int col = x / 40;
-                        
-                        game.floodfill(row, col);
-                        
-                        std::cout << "Clicked: " << row << ", " << col << std::endl;
+
+                        if(mouse->button == sf::Mouse::Button::Left){
+                            if(game.isFlagged(row, col)){
+                                continue;
+                            }
+
+                            if(game.getValue(row, col) == -1){
+                                gameOver = true;
+                            }
+                            else{
+                                game.floodfill(row, col);
+                            }
+                            
+                        }
+                        else if(mouse->button == sf::Mouse::Button::Right){
+                            game.toggleFlag(row, col);
+                        }
                     }
                 }
         }
