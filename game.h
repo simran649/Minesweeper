@@ -20,4 +20,5 @@ public:
     int getValue(int i, int j);
     void toggleFlag(int i, int j);
     bool isFlagged(int i, int j);
+    void handleClick(int row, int col, bool& firstMove, bool& gameOver);
 };

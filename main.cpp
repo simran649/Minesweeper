@@ -3,8 +3,9 @@
 #include <ctime>
 #include "game.h"
 
+bool firstMove = true;
 bool gameOver = false;
-void drawGrid(sf::RenderWindow& window, Minesweeper& game);
+void drawGrid(sf::RenderWindow& window, Minesweeper& game, bool gameOver);
 
 int main() {
     srand(time(0));
@@ -21,7 +22,7 @@ int main() {
             if (event->is<sf::Event::Closed>()){
                 window.close();
             }
-                if (event->is<sf::Event::MouseButtonPressed>()) {
+                if (event->is<sf::Event::MouseButtonPressed>() && !gameOver) {
                     if(auto mouse = event->getIf<sf::Event::MouseButtonPressed>()){
                         
                         int x = mouse->position.x;        
@@ -37,6 +38,7 @@ int main() {
 
                             if(game.getValue(row, col) == -1){
                                 gameOver = true;
+                                continue;
                             }
                             else{
                                 game.floodfill(row, col);
@@ -52,7 +54,7 @@ int main() {
 
         window.clear(sf::Color::Blue);
 
-        drawGrid(window, game);
+        drawGrid(window, game, gameOver);
 
         window.display();
     }
