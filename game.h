@@ -15,10 +15,13 @@ public:
     void printboard();
     void floodfill(int i, int j);
     bool checkwin();
-    
+
     bool isRevealed(int i, int j);
     int getValue(int i, int j);
     void toggleFlag(int i, int j);
     bool isFlagged(int i, int j);
+
     void handleClick(int row, int col, bool& firstMove, bool& gameOver);
+    void revealMineAt(int row, int col);
+    void revealAll();
 };
