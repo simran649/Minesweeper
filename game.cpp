@@ -2,14 +2,12 @@
 #include <cstdlib>
 #include <ctime>
 #include "game.h"
-#include <SFML/Graphics.hpp>
+
 using namespace std;
 
-void Minesweeper::initialization(){
-
-    //board initialization
-    for(int i=0; i<size; i++){
-        for(int j=0; j<size; j++){
+void Minesweeper::initialization() {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
             board[i][j] = 0;
             reveal[i][j] = false;
             flag[i][j] = false;
@@ -17,280 +15,207 @@ void Minesweeper::initialization(){
     }
 }
 
-void Minesweeper::placingmines(){
+void Minesweeper::placingmines() {
     int mines = 0;
-    
-    while(mines <30){
 
+    while (mines < 30) {
         int row = rand() % size;
         int col = rand() % size;
 
-        if(board[row][col] != -1){
+        if (board[row][col] != -1) {
             board[row][col] = -1;
             mines++;
         }
     }
 }
 
-void Minesweeper::calculateno(){
-    for(int i=0; i<size; i++){
-        for(int j=0; j<size; j++){
-            if(board[i][j] != -1){
+void Minesweeper::calculateno() {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (board[i][j] != -1)
                 board[i][j] = 0;
-            }
         }
     }
-    for(int i=0; i<size; i++){
-        for(int j=0; j<size; j++){
-            if(board[i][j]==-1){
-                continue;
-            }
-            int count=0;
-            for(int x=-1; x<=1; x++){
-                for(int y=-1; y<=1; y++){
-                    int ni = x + i;
-                    int nj = y + j;
 
-                    if(ni>=0 && ni<size && nj>=0 && nj<size){
-                        if(board[ni][nj]==-1){
-                            count++;
-                        }
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (board[i][j] == -1)
+                continue;
+
+            int count = 0;
+
+            for (int x = -1; x <= 1; x++) {
+                for (int y = -1; y <= 1; y++) {
+                    int ni = i + x;
+                    int nj = j + y;
+
+                    if (ni >= 0 && ni < size &&
+                        nj >= 0 && nj < size &&
+                        board[ni][nj] == -1) {
+                        count++;
                     }
                 }
             }
-            board[i][j]=count;
+
+            board[i][j] = count;
         }
     }
 }
 
-void Minesweeper::floodfill(int i, int j){
-    if(i<0 || i>=size || j<0 || j>=size){
+void Minesweeper::floodfill(int i, int j) {
+    if (i < 0 || i >= size || j < 0 || j >= size)
         return;
-    }
 
-    if(reveal[i][j] == true){
+    if (reveal[i][j] || board[i][j] == -1 || flag[i][j])
         return;
-    }
 
-    if(board[i][j] == -1){
-        return;
-    }
-
-    //if there is a no. here we will move out of this function
     reveal[i][j] = true;
-    if(board[i][j]!=0){
+
+    if (board[i][j] != 0)
         return;
-    }
 
-    //if we reached this part it means that the cell we clicked is empty contains 0
-    for(int x=-1; x<=1; x++){
-        for(int y=-1; y<=1; y++){
-            floodfill(i + x, j + y);
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+            if (x != 0 || y != 0)
+                floodfill(i + x, j + y);
         }
-    }
-    
-}
-
-void Minesweeper::printboard(){
-    cout<<"\n";
-    for(int i=0; i<size; i++){
-        for(int j=0; j<size; j++){
-
-            //if cell is flagged it will show F in place of the cell
-            if(flag[i][j] == true){
-                cout<<" F ";
-            }
-
-            //if cell is hidden it will show . here
-            else if(reveal[i][j] == false){
-                cout<<" . ";
-            }
-
-            //if there's a mine at that place it will show *
-            else{
-                if(board[i][j] == -1){
-                    cout<<" * ";
-                }
-                else{
-                    if(board[i][j] == 0){
-                        cout<<"   ";
-                    }
-                    else{
-                        cout<<" "<<board[i][j]<<" ";
-                    }
-                }
-            }
-        }
-        cout<<endl;
     }
 }
 
-bool Minesweeper::checkwin(){
+void Minesweeper::printboard() {
+    cout << "\n";
 
-    int checkmines = 0;
-    for(int i=0; i<size; i++){
-        for(int j=0; j<size; j++){
-            if(reveal[i][j] == true && board[i][j] != -1){
-                checkmines++;
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (flag[i][j]) {
+                cout << " F ";
+            }
+            else if (!reveal[i][j]) {
+                cout << " . ";
+            }
+            else if (board[i][j] == -1) {
+                cout << " * ";
+            }
+            else {
+                cout << " " << board[i][j] << " ";
             }
         }
-    }
-    int totalcells = size * size;
-    int minecount = 30;
-    int safe = totalcells - minecount;
 
-    return (checkmines == safe);
+        cout << endl;
+    }
 }
 
-void Minesweeper::play(){
+bool Minesweeper::checkwin() {
+    int safeCells = 0;
 
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (reveal[i][j] && board[i][j] != -1)
+                safeCells++;
+        }
+    }
+
+    return safeCells == 70;
+}
+
+void Minesweeper::play() {
     printboard();
-    bool firstmove = true;
 
-    while(true){
-        int m, n;
-        string ch;
+    bool firstMove = true;
 
-        cout<<"Enter action (flag or click)..."<<endl;
-        cin>>ch;
+    while (true) {
+        int row, col;
+        string action;
 
-        cout<<"enter row and column: "<<endl;
-        cin>>m>>n;
-        m--;
-        n--;
+        cout << "Enter action (click or flag): ";
+        cin >> action;
 
-        //adding constraint so that row and column stay in the limits
-        if(m<0 || m>=size || n<0 || n>=size){
-            cout<<"Invalid input, try again"<<endl;
+        cout << "Enter row and column: ";
+        cin >> row >> col;
+
+        row--;
+        col--;
+
+        if (row < 0 || row >= size || col < 0 || col >= size)
             continue;
-        }
 
-        //if the user wants to place a flag this will place the flag at the desired position and if the flag already exists it will remove it
-        if(ch == "f" || ch == "F"){
-            if(reveal[m][n] == true){
-                cout<<"Cannot flag a revealed cell\n";
-                continue;
-            }
-            if(flag[m][n] == true){
-                flag[m][n] = false;
-                cout << "Flag removed\n";
-            }
-            else{
-                flag[m][n] = true;
-                cout << "Flag placed\n";
-            }
-
+        if (action == "f" || action == "F") {
+            toggleFlag(row, col);
             printboard();
             continue;
         }
 
-        // prevent clicking flagged cell
-        if(flag[m][n] == true){
-            cout << "Cell is flagged. Remove flag first.\n";
-            continue;
-        }
+        bool gameOver = false;
 
-        //preventing selecting one cell multiple times
-        if(reveal[m][n]==true){
-            cout<<"cell already selected, try another cell...\n";
-            continue;
-        }
+        handleClick(row, col, firstMove, gameOver);
 
-        //if at the selected cell there's a mine the program will end
-        if(firstmove && board[m][n]==-1){
-            board[m][n] = 0;
-
-            while(true){
-                int r = rand() % size;
-                int c = rand() % size;
-
-                if(board[r][c] != -1 && (r != m || c != n)){
-                    board[r][c] = -1;
-                    break;
-                }
-            }
-            calculateno();
-         
-        }
-        if(board[m][n] == -1){
-                cout<<"\nGame Over..."<<endl;
-
-                 //will reveal all mines
-                for(int i=0; i<size; i++){
-                    for(int j=0; j<size; j++){
-                        if(board[i][j] == -1){
-                            reveal[i][j] = true;
-                        }
-                    }
-                }
-                printboard(); 
-                break;
-            }
-
-        //cell reveal logic
-        if(board[m][n] == 0){
-            floodfill(m, n);
-        }
-        else{
-            reveal[m][n] = true;
-        }
-
-        //win check
-        if(checkwin()){
-            cout<<"You won..."<<endl;
-
-            for(int i=0; i<size; i++){
-                for(int j=0; j<size; j++){
-                    if(board[i][j] == -1){
-                        reveal[i][j] = true;
-                    }
-                }
-            }
+        if (gameOver) {
+            revealAll();
+            cout << "Game Over\n";
             printboard();
             break;
         }
-        
 
-        firstmove = false;
+        if (checkwin()) {
+            revealAll();
+            cout << "You won!\n";
+            printboard();
+            break;
+        }
 
         printboard();
     }
-
 }
 
-bool Minesweeper::isRevealed(int i, int j){
+bool Minesweeper::isRevealed(int i, int j) {
+    if (i < 0 || i >= size || j < 0 || j >= size)
+        return false;
+
     return reveal[i][j];
 }
-    
-int Minesweeper::getValue(int i, int j){ 
+
+int Minesweeper::getValue(int i, int j) {
+    if (i < 0 || i >= size || j < 0 || j >= size)
+        return 0;
+
     return board[i][j];
 }
 
-void Minesweeper::toggleFlag(int i, int j){
-    if(!reveal[i][j]){
-        flag[i][j] =!flag[i][j];
-    }
+void Minesweeper::toggleFlag(int i, int j) {
+    if (i < 0 || i >= size || j < 0 || j >= size)
+        return;
+
+    if (!reveal[i][j])
+        flag[i][j] = !flag[i][j];
 }
 
-bool Minesweeper::isFlagged(int i, int j){
+bool Minesweeper::isFlagged(int i, int j) {
+    if (i < 0 || i >= size || j < 0 || j >= size)
+        return false;
+
     return flag[i][j];
 }
 
-void Minesweeper::handleClick(int row, int col, bool& firstMove, bool& gameOver){
-
-    if(flag[row][col]){
+void Minesweeper::handleClick(
+    int row,
+    int col,
+    bool& firstMove,
+    bool& gameOver
+) {
+    if (row < 0 || row >= size || col < 0 || col >= size)
         return;
-    }
 
-    if(firstMove && board[row][col] == -1){
+    if (flag[row][col] || reveal[row][col])
+        return;
 
+    if (firstMove && board[row][col] == -1) {
         board[row][col] = 0;
 
-        while(true){
+        while (true) {
             int r = rand() % size;
             int c = rand() % size;
 
-            if(board[r][c] != -1 && (r != row || c != col)){
+            if (board[r][c] != -1 && (r != row || c != col)) {
                 board[r][c] = -1;
                 break;
             }
@@ -299,97 +224,34 @@ void Minesweeper::handleClick(int row, int col, bool& firstMove, bool& gameOver)
         calculateno();
     }
 
-    if(board[row][col] == -1){
+    if (board[row][col] == -1) {
         gameOver = true;
         return;
     }
 
-    if(board[row][col] == 0){
+    if (board[row][col] == 0) {
         floodfill(row, col);
     }
-    else{
+    else {
         reveal[row][col] = true;
     }
 
     firstMove = false;
 }
 
-const int TILE_SIZE = 40;
+void Minesweeper::revealMineAt(int row, int col) {
+    if (row < 0 || row >= size || col < 0 || col >= size)
+        return;
 
-void drawGrid(sf::RenderWindow& window, Minesweeper& game, bool gameOver, bool gameWon){
+    if (board[row][col] == -1)
+        reveal[row][col] = true;
+}
 
-    sf::Font font;
-    if(!font.openFromFile("Roboto-Regular.ttf")){
-        std::cout<<"Font not loaded\n";
-    }
-    sf::RectangleShape cell(sf::Vector2f(TILE_SIZE - 2, TILE_SIZE - 2));
-    cell.setOutlineThickness(1);
-    cell.setOutlineColor(sf::Color::Black);
-
-    for(int i = 0; i < 10; i++){
-        for(int j = 0; j < 10; j++){
-            cell.setPosition(sf::Vector2f(j * TILE_SIZE, i * TILE_SIZE));
-            if(!game.isRevealed(i, j)){
-                cell.setFillColor(sf::Color(150,150,150));
-            }
-            else{
-                cell.setFillColor(sf::Color::White);
-            }
-            window.draw(cell);
-
-            if(gameOver && game.getValue(i, j) == -1){
-                sf::CircleShape mine(10);
-                mine.setFillColor(sf::Color::Black);
-
-                mine.setPosition(sf::Vector2f(
-                    j * TILE_SIZE + 10,
-                    i * TILE_SIZE + 10
-                ));
-
-                window.draw(mine);
-            }
-
-            if(!game.isRevealed(i, j) && game.isFlagged(i, j)){
-                sf::Text flagText(font, "F", 20);
-                flagText.setFillColor(sf::Color::Red);
-
-                flagText.setPosition(sf::Vector2f(
-                    j * TILE_SIZE + 10,
-                    i * TILE_SIZE + 5
-                ));
-
-                window.draw(flagText);
-            }
-
-            if(game.isRevealed(i, j)){
-                int value= game.getValue(i, j);
-
-                if(value > 0){
-                    sf::Text text(font, "", 20);
-                    text.setFont(font);
-                    text.setString(std::to_string(value));
-                    text.setCharacterSize(20);
-                    text.setFillColor(sf::Color::Blue);
-
-                    text.setPosition(sf::Vector2f(j * TILE_SIZE + 10, i * TILE_SIZE + 5));
-                    window.draw(text);
-                }
-            }
-
-        }
-
-        if(gameOver){
-            sf::Text gameOverText(font, "GAME OVER", 40);
-            gameOverText.setFillColor(sf::Color::Red);
-            gameOverText.setPosition(sf::Vector2f(80, 180));
-            window.draw(gameOverText);
-        }
-
-        if(gameWon){
-            sf::Text winText(font, "YOU WIN!", 40);
-            winText.setFillColor(sf::Color::Green);
-            winText.setPosition(sf::Vector2f(100, 100));
-            window.draw(winText);
+void Minesweeper::revealAll() {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (board[i][j] == -1)
+                reveal[i][j] = true;
         }
     }
 }
