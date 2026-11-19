@@ -1156,8 +1156,7 @@ void updateLossAnimation() {
     if (gameStatus != GameStatus::Revealing)
         return;
 
-    float interval = animationEnabled ? 0.06f : 0.f;
-
+    float interval = animationEnabled ? 0.15f : 0.f;
     if (animationClock.getElapsedTime().asSeconds() < interval)
         return;
 
