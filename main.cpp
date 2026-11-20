@@ -1,4 +1,4 @@
-
+#include <iostream>
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <cstdlib>
@@ -1227,8 +1227,10 @@ void handleBoardClick(sf::Vector2f mousePosition, bool rightClick) {
 
     if (rightClick) {
         game.toggleFlag(row, col);
+
         if (soundEnabled)
             audio.play("button_click");
+
         return;
     }
 
@@ -1380,6 +1382,7 @@ void handleClick(sf::Vector2f p, bool rightClick) {
                     soundEnabled = !soundEnabled;
                     audio.setMuted(!soundEnabled);
                 }
+
                 if (i == 1) musicEnabled = !musicEnabled;
                 if (i == 2) animationEnabled = !animationEnabled;
                 if (i == 3) timerEnabled = !timerEnabled;
@@ -1462,8 +1465,16 @@ void handleClick(sf::Vector2f p, bool rightClick) {
 }
 
 int main() {
-    audio.loadSound("button_hover", "assets/audio/sfx/button-hover.wav");
-    audio.loadSound("button_click", "assets/audio/sfx/button-click.wav");
+    if (!audio.loadSound("button_hover", "assets/audio/sfx/button-hover.wav"))
+        std::cerr << "Could not load assets/audio/sfx/button_hover.wav\\n";
+
+    if (!audio.loadSound("button_click", "assets/audio/sfx/button-click.wav"))
+        std::cerr << "Could not load assets/audio/sfx/button_click.wav\\n";
+
+    if (!audio.loadSound("tile_reveal", "assets/audio/sfx/title-reveal.wav"))
+        std::cerr << "Could not load assets/audio/sfx/tile_reveal.wav\\n";
+
+    audio.setMuted(!soundEnabled);
     std::srand(
         static_cast<unsigned int>(std::time(nullptr))
     );

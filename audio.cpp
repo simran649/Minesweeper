@@ -2,17 +2,13 @@
 #include "audio.h"
 #include <algorithm>
 
-bool AudioManager::loadSound(
-    const std::string& name,
-    const std::string& path
-) {
-    auto [it, inserted] = soundBuffers.try_emplace(name);
+bool AudioManager::loadSound(const std::string& name, const std::string& path) {
+    sf::SoundBuffer buffer;
 
-    if (!it->second.loadFromFile(path)) {
-        soundBuffers.erase(it);
+    if (!buffer.loadFromFile(path))
         return false;
-    }
 
+    buffers.insert_or_assign(name, std::move(buffer));
     return true;
 }
 
@@ -20,24 +16,33 @@ void AudioManager::play(const std::string& name) {
     if (muted)
         return;
 
-    auto it = soundBuffers.find(name);
+    auto found = buffers.find(name);
 
-    if (it == soundBuffers.end())
+    if (found == buffers.end())
         return;
 
-    std::erase_if(activeSounds, [](const sf::Sound& sound) {
-        return sound.getStatus() == sf::Sound::Status::Stopped;
-    });
+    activeSounds.erase(
+        std::remove_if(
+            activeSounds.begin(),
+            activeSounds.end(),
+            [](const std::unique_ptr<sf::Sound>& sound) {
+                return sound->getStatus() == sf::SoundSource::Status::Stopped;
+            }
+        ),
+        activeSounds.end()
+    );
 
-    activeSounds.emplace_back(it->second);
-    activeSounds.back().setVolume(sfxVolume);
-    activeSounds.back().play();
+    auto sound = std::make_unique<sf::Sound>(found->second);
+    sound->setVolume(volume);
+    sound->play();
+
+    activeSounds.push_back(std::move(sound));
 }
 
-void AudioManager::setVolume(float volume) {
-    sfxVolume = std::clamp(volume, 0.0f, 100.0f);
+void AudioManager::setVolume(float value) {
+    volume = std::clamp(value, 0.0f, 100.0f);
 }
 
-void AudioManager::setMuted(bool state) {
-    muted = state;
+void AudioManager::setMuted(bool value) {
+    muted = value;
 }
