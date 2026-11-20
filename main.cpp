@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "game.h"
+#include "audio.h"
 
 const unsigned int WIDTH = 1200;
 const unsigned int HEIGHT = 900;
@@ -48,6 +49,7 @@ enum class GameStatus {
 
 sf::Font font;
 Minesweeper game;
+AudioManager audio;
 
 Screen screen = Screen::Menu;
 Screen previousScreen = Screen::Menu;
@@ -1156,7 +1158,7 @@ void updateLossAnimation() {
     if (gameStatus != GameStatus::Revealing)
         return;
 
-    float interval = animationEnabled ? 0.15f : 0.f;
+    float interval = animationEnabled ? 0.20f : 0.f;
     if (animationClock.getElapsedTime().asSeconds() < interval)
         return;
 
@@ -1225,9 +1227,12 @@ void handleBoardClick(sf::Vector2f mousePosition, bool rightClick) {
 
     if (rightClick) {
         game.toggleFlag(row, col);
+        if (soundEnabled)
+            audio.play("button_click");
         return;
     }
 
+    bool wasRevealed = game.isRevealed(row, col);
     bool lost = false;
 
     game.handleClick(
@@ -1236,6 +1241,9 @@ void handleBoardClick(sf::Vector2f mousePosition, bool rightClick) {
         firstMove,
         lost
     );
+
+    if (!wasRevealed && game.isRevealed(row, col) && soundEnabled)
+        audio.play("tile_reveal");
 
     if (lost) {
         startLossAnimation();
@@ -1368,7 +1376,10 @@ void handleClick(sf::Vector2f p, bool rightClick) {
             float y = 230.f + i * 82.f;
 
             if (inside({{300, y - 10}, {600, 65}}, p)) {
-                if (i == 0) soundEnabled = !soundEnabled;
+                if (i == 0) {
+                    soundEnabled = !soundEnabled;
+                    audio.setMuted(!soundEnabled);
+                }
                 if (i == 1) musicEnabled = !musicEnabled;
                 if (i == 2) animationEnabled = !animationEnabled;
                 if (i == 3) timerEnabled = !timerEnabled;
@@ -1451,6 +1462,8 @@ void handleClick(sf::Vector2f p, bool rightClick) {
 }
 
 int main() {
+    audio.loadSound("button_hover", "assets/audio/sfx/button-hover.wav");
+    audio.loadSound("button_click", "assets/audio/sfx/button-click.wav");
     std::srand(
         static_cast<unsigned int>(std::time(nullptr))
     );
@@ -1489,6 +1502,9 @@ int main() {
                     static_cast<float>(mouse->position.x),
                     static_cast<float>(mouse->position.y)
                 );
+
+                if (mouse->button == sf::Mouse::Button::Left && soundEnabled)
+                    audio.play("button_click");
 
                 handleClick(
                     p,
