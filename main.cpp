@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -1148,6 +1149,15 @@ void startLossAnimation() {
         revealIndex = 0;
         animationClock.restart();
     } else {
+        if (soundEnabled) {
+            for (int r = 0; r < game.getRows(); r++) {
+                for (int c = 0; c < game.getCols(); c++) {
+                    if (game.getValue(r, c) == -1)
+                        audio.play("bomb_explosion");
+                }
+            }
+        }
+
         game.revealAll();
         gameStatus = GameStatus::Finished;
         screen = Screen::Lost;
@@ -1176,6 +1186,10 @@ void updateLossAnimation() {
 
         if (game.getValue(row, col) == -1) {
             game.revealMineAt(row, col);
+
+            if (soundEnabled)
+                audio.play("bomb_explosion");
+
             revealedCount = 1;
             break;
         }
@@ -1474,7 +1488,20 @@ int main() {
     if (!audio.loadSound("tile_reveal", "assets/audio/sfx/title-reveal.wav"))
         std::cerr << "Could not load assets/audio/sfx/tile_reveal.wav\\n";
 
+    if (!audio.loadSound("bomb_explosion", "assets/audio/sfx/bomb_explosion.wav"))
+        std::cerr << "Could not load assets/audio/sfx/bomb_explosion.wav\n";
+
     audio.setMuted(!soundEnabled);
+
+    sf::Music mainMenuMusic;
+    if (mainMenuMusic.openFromFile("assets/audio/sfx/main_menu.wav")) {
+        mainMenuMusic.setLooping(true);
+        if (soundEnabled && musicEnabled)
+            mainMenuMusic.play();
+    } else {
+        std::cerr << "Could not load assets/audio/sfx/main_menu.wav\n";
+    }
+
     std::srand(
         static_cast<unsigned int>(std::time(nullptr))
     );
@@ -1525,6 +1552,20 @@ int main() {
         }
 
         updateLossAnimation();
+
+        bool shouldPlayMusic =
+            soundEnabled &&
+            musicEnabled &&
+            gameStatus != GameStatus::Revealing &&
+            screen != Screen::Lost;
+
+        if (shouldPlayMusic) {
+            if (mainMenuMusic.getStatus() != sf::SoundSource::Status::Playing)
+                mainMenuMusic.play();
+        } else {
+            if (mainMenuMusic.getStatus() == sf::SoundSource::Status::Playing)
+                mainMenuMusic.pause();
+        }
 
         drawBackground(window);
 

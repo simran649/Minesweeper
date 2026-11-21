@@ -7,7 +7,6 @@ g++ -std=c++17 main.cpp game.cpp audio.cpp -o game \
 
 if [ $? -eq 0 ]; then
     echo "Build successful!"
-    ./game
 else
     echo "Build failed!"
 fi
